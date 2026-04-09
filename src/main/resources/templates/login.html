@@ -1,18 +1,56 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Login</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>dav.io — Login</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
 </head>
 <body>
+<div class="auth-page">
+    <div class="auth-box">
+        <div class="auth-logo">dav<span>.io</span></div>
+        <div class="auth-tagline">Book appointments with our team</div>
 
-<form method="post" action="/login">
-    <label>Username: <input type="text"
-                            name="username"/></label><br/>
-    <label>Password: <input type="password"
-                            name="password"/></label><br/>
-    <input type="submit" value="Login"/>
-</form>
+        <div class="auth-card">
+            <!-- Error / Success Messages -->
+            <div class="auth-error" th:if="${param.error}">
+                Invalid username or password. Please try again.
+            </div>
+            <div class="auth-success" th:if="${param.logout}">
+                You have been logged out successfully.
+            </div>
+            <div class="auth-success" th:if="${param.registered}">
+                Account created! Please sign in.
+            </div>
 
+            <p style="font-size:15px;font-weight:500;color:var(--white);margin-bottom:1.25rem">Sign in</p>
+
+            <form th:action="@{/login}" method="post">
+                <div class="form-group">
+                    <label class="form-label" style="color:#888">Username</label>
+                    <input class="form-input form-input-dark"
+                           type="text"
+                           name="username"
+                           placeholder="Enter your username"
+                           required/>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" style="color:#888">Password</label>
+                    <input class="form-input form-input-dark"
+                           type="password"
+                           name="password"
+                           placeholder="••••••••"
+                           required/>
+                </div>
+                <button type="submit" class="btn btn-primary">Sign in</button>
+            </form>
+
+            <div class="auth-switch">
+                No account? <a th:href="@{/register}">Register here</a>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>

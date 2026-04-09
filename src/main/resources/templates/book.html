@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>dav.io — Book a Slot</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+
+<div class="main-content">
+
+    <a class="back-link" th:href="@{/}">
+        ← Back to home
+    </a>
+
+    <!-- Admin Header -->
+    <div class="book-header">
+        <div class="book-avatar"
+             th:text="${#strings.substring(admin.username, 0, 2).toUpperCase()}">AB</div>
+        <div>
+            <div class="book-admin-name" th:text="${admin.username}">username</div>
+            <div class="book-admin-bio">Available for appointments</div>
+        </div>
+    </div>
+
+    <!-- Alerts -->
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <!-- No slots message -->
+    <div class="alert alert-info" th:if="${#lists.isEmpty(slots)}">
+        No available slots for this person right now. Check back later!
+    </div>
+
+    <!-- Slot Selection -->
+    <div class="card" th:if="${not #lists.isEmpty(slots)}">
+        <div class="section-label">Available slots</div>
+
+        <form th:action="@{/book}" method="post">
+            <input type="hidden" name="adminId" th:value="${admin.id}"/>
+
+            <div th:each="slot : ${slots}">
+                <label class="slot-label">
+                    <input type="radio" name="slotId" th:value="${slot.id}" required/>
+                    <span class="slot-time"
+                          th:text="${slot.startTime} + ' – ' + ${slot.endTime}">
+                        9:00 – 9:30
+                    </span>
+                    <span class="slot-dur"
+                          th:text="${slot.slotDate}">
+                        May 1
+                    </span>
+                </label>
+            </div>
+
+            <hr class="divider"/>
+
+            <div class="form-group">
+                <label class="form-label">Notes (optional)</label>
+                <textarea class="form-input"
+                          name="notes"
+                          rows="2"
+                          placeholder="What is this appointment about?"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Confirm booking</button>
+        </form>
+    </div>
+
+</div>
+
+<div th:replace="~{fragments/layout :: sidebar-script}"></div>
+</body>
+</html>

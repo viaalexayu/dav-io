@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>dav.io — My Bookings</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+
+<div class="main-content">
+
+    <div class="page-header">
+        <div class="page-title">My bookings</div>
+        <div class="page-sub">Track your appointment status</div>
+    </div>
+
+    <!-- Alerts -->
+    <div class="alert alert-success" th:if="${param.success}">
+        Booking submitted! Waiting for approval.
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" th:if="${#lists.isEmpty(appointments)}">
+        <p>You have no bookings yet.</p>
+        <a th:href="@{/}" style="color:var(--purple);font-size:13px;margin-top:8px;display:inline-block">
+            Book an appointment →
+        </a>
+    </div>
+
+    <!-- Booking Cards -->
+    <div th:each="appt : ${appointments}">
+        <div class="booking-card">
+            <div class="booking-top">
+                <div>
+                    <div class="booking-name"
+                         th:text="${appt.slot.admin.username}">Admin name</div>
+                    <div class="booking-meta">
+                        <span th:text="${appt.slot.slotDate}">May 1, 2025</span>
+                        ·
+                        <span th:text="${appt.slot.startTime} + ' – ' + ${appt.slot.endTime}">9:00 – 9:30 AM</span>
+                        <br/>
+                        <span th:if="${appt.notes}" th:text="'Notes: ' + ${appt.notes}"></span>
+                    </div>
+                </div>
+                <span class="badge"
+                      th:classappend="${appt.status == 'CONFIRMED'} ? 'badge-confirmed' : (${appt.status == 'CANCELLED'} ? 'badge-cancelled' : 'badge-pending')"
+                      th:text="${appt.status}">PENDING</span>
+            </div>
+            <div class="booking-bar">
+                <div class="booking-bar-fill"
+                     th:style="${appt.status == 'CONFIRMED'} ? 'width:100%;background:#2e7d32' : (${appt.status == 'CANCELLED'} ? 'width:100%;background:#c62828' : 'width:50%;background:#856404')">
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div th:replace="~{fragments/layout :: sidebar-script}"></div>
+</body>
+</html>

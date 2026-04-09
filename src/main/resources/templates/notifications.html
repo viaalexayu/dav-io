@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>dav.io — Notifications</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+
+<div class="main-content">
+
+    <div class="page-header">
+        <div class="page-title">Notifications</div>
+        <div class="page-sub">Stay updated on your bookings</div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" th:if="${#lists.isEmpty(notifications)}">
+        <p>No notifications yet.</p>
+    </div>
+
+    <!-- Notification Cards -->
+    <div th:each="notif : ${notifications}">
+        <div class="notif-card"
+             th:classappend="${!notif.isRead} ? ' notif-unread' : ' read'">
+            <div class="notif-inner">
+                <div class="notif-dot" th:if="${!notif.isRead}"></div>
+                <div class="notif-msg" th:text="${notif.message}">Notification message</div>
+            </div>
+            <div class="notif-meta">
+                <span class="notif-time" th:text="${notif.sentAt}">Just now</span>
+                <form th:if="${!notif.isRead}"
+                      th:action="@{/notifications/{id}/read(id=${notif.id})}"
+                      method="post">
+                    <button type="submit" class="btn btn-sm">Mark as read</button>
+                </form>
+                <span class="notif-read-label" th:if="${notif.isRead}">Read</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div th:replace="~{fragments/layout :: sidebar-script}"></div>
+</body>
+</html>
