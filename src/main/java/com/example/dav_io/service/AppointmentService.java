@@ -45,7 +45,18 @@ public class AppointmentService {
         timeSlotRepository.save(slot);
 
         Appointment saved = appointmentRepository.save(appointment);
-        sendNotification(user, saved, "Your booking is pending approval.");
+
+        // Notify the user — booking is pending
+        sendNotification(user, saved,
+                "Your booking on " + slot.getSlotDate() +
+                        " at " + slot.getStartTime() + " is pending approval.");
+
+        // Notify the admin — someone booked their slot
+        sendNotification(slot.getAdmin(), saved,
+                slot.getAdmin().getUsername() + ", " + user.getUsername() +
+                        " booked your slot on " + slot.getSlotDate() +
+                        " at " + slot.getStartTime() + ". Please confirm or reject.");
+
         return saved;
     }
 
@@ -55,9 +66,17 @@ public class AppointmentService {
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
         appointment.setStatus("CONFIRMED");
         appointmentRepository.save(appointment);
+
+        // Notify the user who booked
         sendNotification(appointment.getUser(), appointment,
                 "Your booking on " + appointment.getSlot().getSlotDate() +
                         " at " + appointment.getSlot().getStartTime() + " has been confirmed!");
+
+        // Notify the admin too
+        sendNotification(appointment.getSlot().getAdmin(), appointment,
+                "You confirmed a booking with " + appointment.getUser().getUsername() +
+                        " on " + appointment.getSlot().getSlotDate() +
+                        " at " + appointment.getSlot().getStartTime());
     }
 
     @Transactional
