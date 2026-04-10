@@ -79,7 +79,7 @@ public class AppointmentService {
     }
 
     public List<Appointment> getUserAppointments(Long userId) {
-        return appointmentRepository.findByUserId(userId);
+        return appointmentRepository.findByUser_Id(userId);
     }
 
     private void sendNotification(User user, Appointment appointment, String message) {

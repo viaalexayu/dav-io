@@ -14,45 +14,64 @@
 <div class="main-content">
 
     <div class="page-header">
-        <div class="page-title">My bookings</div>
-        <div class="page-sub">Track your appointment status</div>
+        <!-- Different title based on role -->
+        <div class="page-title"
+             th:text="${isAdmin} ? 'Upcoming bookings with me' : 'My bookings'">
+            My bookings
+        </div>
+        <div class="page-sub"
+             th:text="${isAdmin} ? 'People who booked a slot with you' : 'Track your appointment status'">
+        </div>
     </div>
 
-    <!-- Alerts -->
+    <!-- Success alert -->
     <div class="alert alert-success" th:if="${param.success}">
         Booking submitted! Waiting for approval.
     </div>
 
-    <!-- Empty State -->
+    <!-- Empty state -->
     <div class="empty-state" th:if="${#lists.isEmpty(appointments)}">
-        <p>You have no bookings yet.</p>
-        <a th:href="@{/}" style="color:var(--purple);font-size:13px;margin-top:8px;display:inline-block">
+        <p th:text="${isAdmin} ? 'No one has booked with you yet.' : 'You have no bookings yet.'"></p>
+        <a th:if="${!isAdmin}" th:href="@{/}"
+           style="color:var(--purple);font-size:13px;margin-top:8px;display:inline-block">
             Book an appointment →
         </a>
     </div>
 
-    <!-- Booking Cards -->
+    <!-- Booking cards -->
     <div th:each="appt : ${appointments}">
         <div class="booking-card">
             <div class="booking-top">
                 <div>
+                    <!-- Admin sees WHO booked with them -->
+                    <!-- User sees WHO they booked with -->
                     <div class="booking-name"
-                         th:text="${appt.slot.admin.username}">Admin name</div>
+                         th:text="${isAdmin} ? ${appt.user.username} : ${appt.slot.admin.username}">
+                        Name
+                    </div>
                     <div class="booking-meta">
-                        <span th:text="${appt.slot.slotDate}">May 1, 2025</span>
+                        <span th:text="${appt.slot.slotDate}">May 1</span>
                         ·
-                        <span th:text="${appt.slot.startTime} + ' – ' + ${appt.slot.endTime}">9:00 – 9:30 AM</span>
+                        <span th:text="${appt.slot.startTime} + ' – ' + ${appt.slot.endTime}">
+                            9:00 – 9:30
+                        </span>
                         <br/>
-                        <span th:if="${appt.notes}" th:text="'Notes: ' + ${appt.notes}"></span>
+                        <span th:if="${appt.notes}"
+                              th:text="'Notes: ' + ${appt.notes}"></span>
                     </div>
                 </div>
                 <span class="badge"
-                      th:classappend="${appt.status == 'CONFIRMED'} ? 'badge-confirmed' : (${appt.status == 'CANCELLED'} ? 'badge-cancelled' : 'badge-pending')"
-                      th:text="${appt.status}">PENDING</span>
+                      th:classappend="${appt.status == 'CONFIRMED'} ? 'badge-confirmed' :
+                                      (${appt.status == 'CANCELLED'} ? 'badge-cancelled' : 'badge-pending')"
+                      th:text="${appt.status}">
+                    PENDING
+                </span>
             </div>
             <div class="booking-bar">
                 <div class="booking-bar-fill"
-                     th:style="${appt.status == 'CONFIRMED'} ? 'width:100%;background:#2e7d32' : (${appt.status == 'CANCELLED'} ? 'width:100%;background:#c62828' : 'width:50%;background:#856404')">
+                     th:style="${appt.status == 'CONFIRMED'} ? 'width:100%;background:#2e7d32' :
+                               (${appt.status == 'CANCELLED'} ? 'width:100%;background:#c62828' :
+                               'width:50%;background:#856404')">
                 </div>
             </div>
         </div>

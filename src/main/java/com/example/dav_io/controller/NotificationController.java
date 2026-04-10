@@ -27,7 +27,7 @@ public class NotificationController {
         User user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         model.addAttribute("notifications",
-                notificationRepository.findByUserIdOrderBySentAtDesc(user.getId()));
+                notificationRepository.findByUser_IdOrderBySentAtDesc(user.getId()));
         return "notifications";
     }
 

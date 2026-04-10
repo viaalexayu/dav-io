@@ -1,6 +1,7 @@
 package com.example.dav_io.controller;
 
 import com.example.dav_io.model.User;
+import com.example.dav_io.repository.AppointmentRepository;
 import com.example.dav_io.repository.TimeSlotRepository;
 import com.example.dav_io.repository.UserRepository;
 import com.example.dav_io.service.AppointmentService;
@@ -16,16 +17,18 @@ public class BookingController {
     private final AppointmentService appointmentService;
     private final UserRepository userRepository;
     private final TimeSlotRepository timeSlotRepository;
+    private final AppointmentRepository appointmentRepository; // ← ADD THIS
 
     public BookingController(AppointmentService appointmentService,
                              UserRepository userRepository,
-                             TimeSlotRepository timeSlotRepository) {
+                             TimeSlotRepository timeSlotRepository,
+                             AppointmentRepository appointmentRepository) { // ← ADD THIS
         this.appointmentService = appointmentService;
         this.userRepository = userRepository;
         this.timeSlotRepository = timeSlotRepository;
+        this.appointmentRepository = appointmentRepository; // ← ADD THIS
     }
 
-    // Show available slots for a specific admin
     @GetMapping("/book/{adminId}")
     public String bookPage(@PathVariable Long adminId, Model model) {
         model.addAttribute("admin", userRepository.findById(adminId)
@@ -35,7 +38,6 @@ public class BookingController {
         return "book";
     }
 
-    // Submit booking
     @PostMapping("/book")
     public String submitBooking(@RequestParam Long slotId,
                                 @RequestParam(required = false) String notes,
@@ -51,14 +53,24 @@ public class BookingController {
         }
     }
 
-    // User sees their own bookings
     @GetMapping("/my-bookings")
     public String myBookings(@AuthenticationPrincipal UserDetails userDetails,
                              Model model) {
         User user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        model.addAttribute("appointments",
-                appointmentService.getUserAppointments(user.getId()));
+
+        if (userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+            // Admin sees bookings made WITH them
+            model.addAttribute("appointments",
+                    appointmentRepository.findBySlot_Admin_Id(user.getId()));
+            model.addAttribute("isAdmin", true);
+        } else {
+            // User sees their own bookings
+            model.addAttribute("appointments",
+                    appointmentService.getUserAppointments(user.getId()));
+            model.addAttribute("isAdmin", false);
+        }
         return "my-bookings";
     }
 }
