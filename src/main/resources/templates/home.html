@@ -1,13 +1,53 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <meta charset="UTF-8">
-    <title>Home</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>dav.io — Home</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
 </head>
 <body>
 
-<h2>Welcome!</h2>
-<a href="/logout">Logout</a>
+<div th:replace="~{fragments/layout :: sidebar}"></div>
 
+<div class="main-content">
+
+    <!-- Hero -->
+    <div class="hero">
+        <div class="hero-eyebrow">Online booking</div>
+        <div class="hero-title">Book time with our <span>team</span></div>
+        <div class="hero-sub">Pick a person, choose a slot, and you're done.</div>
+    </div>
+
+    <!-- Alerts -->
+    <div class="alert alert-error" th:if="${param.error}">
+        <span th:text="${param.error}">Something went wrong. Please try again.</span>
+    </div>
+
+    <!-- Admin Cards -->
+    <div class="page-header">
+        <div class="section-label">Who would you like to meet?</div>
+    </div>
+
+    <div class="admin-grid" th:if="${not #lists.isEmpty(admins)}">
+        <a class="admin-card"
+           th:each="admin : ${admins}"
+           th:href="@{/book/{id}(id=${admin.id})}">
+            <div class="admin-avatar"
+                 th:text="${#strings.substring(admin.username, 0, 2).toUpperCase()}">AB</div>
+            <div class="admin-name" th:text="${admin.username}">username</div>
+            <div class="admin-bio">Available for appointments</div>
+            <button class="admin-book-btn">Book a slot</button>
+        </a>
+    </div>
+
+    <div class="empty-state" th:if="${#lists.isEmpty(admins)}">
+        <p>No team members available at the moment.</p>
+    </div>
+
+</div>
+
+<div th:replace="~{fragments/layout :: sidebar-script}"></div>
 </body>
 </html>

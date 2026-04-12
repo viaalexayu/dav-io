@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>dav.io — Admin Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+
+<div class="main-content">
+
+    <div class="page-header">
+        <div class="page-title">Admin dashboard</div>
+        <div class="page-sub" sec:authentication="name">Logged in as admin</div>
+    </div>
+
+    <!-- Alerts -->
+    <div class="alert alert-success" th:if="${param.confirmed}">Booking confirmed!</div>
+    <div class="alert alert-error"   th:if="${param.cancelled}">Booking cancelled.</div>
+    <div class="alert alert-success" th:if="${param.slotAdded}">Time slot added!</div>
+    <div class="alert alert-info"    th:if="${param.slotDeleted}">Time slot removed.</div>
+
+    <!-- Stats -->
+    <div class="stat-row">
+        <div class="stat-card">
+            <div class="stat-num" th:text="${#lists.size(appointments)}">0</div>
+            <div class="stat-lbl">Total</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num" style="color:#2e7d32"
+                 th:text="${#lists.size(appointments.?[status == 'CONFIRMED'])}">0</div>
+            <div class="stat-lbl">Confirmed</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num" style="color:var(--purple)"
+                 th:text="${#lists.size(appointments.?[status == 'PENDING'])}">0</div>
+            <div class="stat-lbl">Pending</div>
+        </div>
+    </div>
+
+    <!-- All Bookings -->
+    <div class="section-label" style="margin-bottom:10px">All bookings</div>
+
+    <div class="empty-state" th:if="${#lists.isEmpty(appointments)}">
+        <p>No bookings yet.</p>
+    </div>
+
+    <div th:each="appt : ${appointments}">
+        <div class="admin-row">
+            <div class="admin-row-avatar"
+                 th:text="${#strings.substring(appt.user.username,0,2).toUpperCase()}">US</div>
+            <div class="admin-row-info">
+                <div class="admin-row-name" th:text="${appt.user.username}">username</div>
+                <div class="admin-row-detail"
+                     th:text="${appt.slot.slotDate} + ' · ' + ${appt.slot.startTime} + ' – ' + ${appt.slot.endTime} + (${appt.notes != null and !appt.notes.isEmpty()} ? ' · ' + ${appt.notes} : '')">
+                </div>
+            </div>
+            <div class="admin-row-actions">
+                <span class="badge"
+                      th:classappend="${appt.status == 'CONFIRMED'} ? 'badge-confirmed' : (${appt.status == 'CANCELLED'} ? 'badge-cancelled' : 'badge-pending')"
+                      th:text="${appt.status}">PENDING</span>
+                <div class="action-btns" th:if="${appt.status == 'PENDING'}">
+                    <form th:action="@{/admin/confirm/{id}(id=${appt.id})}" method="post" style="display:inline">
+                        <button type="submit" class="btn btn-success">Accept</button>
+                    </form>
+                    <form th:action="@{/admin/cancel/{id}(id=${appt.id})}" method="post" style="display:inline">
+                        <button type="submit" class="btn btn-danger">Reject</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Time Slots -->
+    <div style="margin-top:2rem">
+        <div class="section-label" style="margin-bottom:10px">My time slots</div>
+
+        <!-- Add Slot Form -->
+        <div class="card" style="margin-bottom:1rem">
+            <div style="font-size:14px;font-weight:500;color:var(--black);margin-bottom:1rem">Add a new slot</div>
+            <form th:action="@{/admin/slots/add}" method="post">
+                <div class="add-slot-inputs">
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input class="form-input" type="date" name="slotDate" required/>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Start time</label>
+                        <input class="form-input" type="time" name="startTime" required/>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">End time</label>
+                        <input class="form-input" type="time" name="endTime" required/>
+                    </div>
+                    <div class="form-group" style="display:flex;align-items:flex-end">
+                        <button type="submit" class="btn btn-dark" style="white-space:nowrap">Add slot</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Slot List -->
+        <div class="empty-state" th:if="${#lists.isEmpty(slots)}">
+            <p>You haven't added any time slots yet.</p>
+        </div>
+
+        <div th:each="slot : ${slots}">
+            <div class="slot-manage-row">
+                <div>
+                    <div class="slot-manage-info"
+                         th:text="${slot.startTime} + ' – ' + ${slot.endTime}">9:00 – 9:30</div>
+                    <div class="slot-manage-date" th:text="${slot.slotDate}">May 1, 2025</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px">
+                    <span th:if="${slot.isAvailable}"
+                          style="font-size:11px;color:#2e7d32;font-family:var(--mono)">Available</span>
+                    <span th:if="${!slot.isAvailable}"
+                          style="font-size:11px;color:#c62828;font-family:var(--mono)">Booked</span>
+                    <form th:action="@{/admin/slots/delete/{id}(id=${slot.id})}" method="post">
+                        <button type="submit" class="btn btn-sm btn-danger"
+                                th:disabled="${!slot.isAvailable}"
+                                onclick="return confirm('Delete this slot?')">Remove</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div th:replace="~{fragments/layout :: sidebar-script}"></div>
+</body>
+</html>
