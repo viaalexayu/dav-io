@@ -23,6 +23,7 @@
     <div class="alert alert-error"   th:if="${param.cancelled}">Booking cancelled.</div>
     <div class="alert alert-success" th:if="${param.slotAdded}">Time slot added!</div>
     <div class="alert alert-info"    th:if="${param.slotDeleted}">Time slot removed.</div>
+    <div class="alert alert-error"   th:if="${param.overlapError}">This slot overlaps with an existing one. Please choose a different time.</div>
 
     <!-- Stats -->
     <div class="stat-row">

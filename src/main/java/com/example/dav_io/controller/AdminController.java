@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
@@ -67,6 +68,15 @@ public class AdminController {
 
         User admin = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Admin not found"));
+
+        List<TimeSlot> existing = timeSlotRepository.findByAdminId(admin.getId());
+        for (TimeSlot s : existing) {
+            if (s.getSlotDate().equals(slotDate)) {
+                if (startTime.isBefore(s.getEndTime()) && endTime.isAfter(s.getStartTime())) {
+                    return "redirect:/admin?overlapError";
+                }
+            }
+        }
 
         TimeSlot slot = new TimeSlot();
         slot.setAdmin(admin);
