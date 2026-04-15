@@ -43,8 +43,6 @@
         <div class="booking-card">
             <div class="booking-top">
                 <div>
-                    <!-- Admin sees WHO booked with them -->
-                    <!-- User sees WHO they booked with -->
                     <div class="booking-name"
                          th:text="${isAdmin} ? ${appt.user.username} : ${appt.slot.admin.username}">
                         Name
@@ -53,32 +51,67 @@
                         <span th:text="${appt.slot.slotDate}">May 1</span>
                         ·
                         <span th:text="${appt.slot.startTime} + ' – ' + ${appt.slot.endTime}">
-                            9:00 – 9:30
-                        </span>
+                    9:00 – 9:30
+                </span>
                         <br/>
                         <span th:if="${appt.notes}"
                               th:text="'Notes: ' + ${appt.notes}"></span>
                     </div>
                 </div>
-                <span class="badge"
+                <span class="badge appointment-status"
+                      th:data-date="${appt.slot.slotDate}"
+                      th:data-start="${appt.slot.startTime}"
+                      th:data-end="${appt.slot.endTime}"
+                      th:data-status="${appt.status}"
                       th:classappend="${appt.status == 'CONFIRMED'} ? 'badge-confirmed' :
-                                      (${appt.status == 'CANCELLED'} ? 'badge-cancelled' : 'badge-pending')"
+                              (${appt.status == 'CANCELLED'} ? 'badge-cancelled' : 'badge-pending')"
                       th:text="${appt.status}">
                     PENDING
                 </span>
             </div>
-            <div class="booking-bar">
-                <div class="booking-bar-fill"
-                     th:style="${appt.status == 'CONFIRMED'} ? 'width:100%;background:#2e7d32' :
-                               (${appt.status == 'CANCELLED'} ? 'width:100%;background:#c62828' :
-                               'width:50%;background:#856404')">
-                </div>
-            </div>
-        </div>
     </div>
-
 </div>
 
 <div th:replace="~{fragments/layout :: sidebar-script}"></div>
+
+<script th:inline="javascript">
+    function updateAppointmentStatuses() {
+        const now = new Date();
+
+        document.querySelectorAll('.appointment-status').forEach(badge => {
+            const status = badge.dataset.status;
+
+            if (status === 'CANCELLED') {
+                return;
+            }
+
+            const date = badge.dataset.date;
+            const startTime = badge.dataset.start;
+            const endTime = badge.dataset.end;
+
+            const startDateTime = new Date(`${date} ${startTime}`);
+            const endDateTime = new Date(`${date} ${endTime}`)
+
+            let newStatus, newClass;
+
+            if (now < startDateTime) {
+                newStatus = status;
+                newClass = status === 'CONFIRMED' ? 'badge-confirmed' : 'badge-pending';
+            } else if (now >= startDateTime && now <= endDateTime) {
+                newStatus = 'ONGOING';
+                newClass = 'badge-ongoing';
+            } else {
+                newStatus = 'ENDED';
+                newClass = 'badge-ended';
+            }
+
+            badge.textContent = newStatus;
+            badge.className = 'badge appointment-status ' + newClass;
+        });
+    }
+
+    updateAppointmentStatuses();
+    setInterval(updateAppointmentStatuses, 60000);
+</script>
 </body>
 </html>
