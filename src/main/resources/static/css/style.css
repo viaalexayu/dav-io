@@ -747,6 +747,16 @@ textarea.form-input {
 .badge-confirmed { background: #E8F5E9; color: #2e7d32; }
 .badge-cancelled { background: #FFEBEE; color: #c62828; }
 
+.badge-ongoing {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.badge-ended {
+    background-color: #6b7280;
+    color: white;
+}
+
 /* ── Booking Cards ────────────────────────────────────────────── */
 .booking-card {
     background: var(--white);
